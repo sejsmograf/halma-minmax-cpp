@@ -1,0 +1,7 @@
+#include "Heuristics.hpp"
+#include <cstdlib>
+
+float ManhattanDistance::calculateDistance(int row, int col, int goalRow,
+                                           int goalCol) const {
+    return abs(row - goalRow) + abs(col - goalCol);
+};
