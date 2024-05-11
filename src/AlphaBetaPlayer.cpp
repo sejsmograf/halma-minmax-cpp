@@ -1,4 +1,5 @@
 #include "AlphaBetaPlayer.hpp"
+#include <algorithm>
 #include <limits>
 
 AlphaBetaPlayer::AlphaBetaPlayer(int depth, FieldType maximizingPlayer,
@@ -6,16 +7,23 @@ AlphaBetaPlayer::AlphaBetaPlayer(int depth, FieldType maximizingPlayer,
     : depth(depth), maximizingPlayer(maximizingPlayer),
       distanceFunction(distanceFunction){};
 
-void AlphaBetaPlayer::makeMove(Halma &game){};
+void AlphaBetaPlayer::makeMove(Halma &game) {
+    pair<float, piece_move> minmaxResult = alphabeta(
+        game, depth, maximizingPlayer, distanceFunction,
+        -numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
+
+    piece_move chosenMove = minmaxResult.second;
+    game.makeMove(chosenMove);
+};
 
 pair<float, piece_move>
-alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-          const HeuristicDistance &distanceFunction,
-          float alpha = -numeric_limits<float>::infinity(),
-          float beta = numeric_limits<float>::infinity()) {
+AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
+                           const HeuristicDistance &distanceFunction,
+                           float alpha = -numeric_limits<float>::infinity(),
+                           float beta = numeric_limits<float>::infinity()) {
 
     Board &board = game.getBoard();
-    if (depth == 0) {
+    if (depth == 0 || game.checkWinner(maximizingPlayer)) {
         return {evaluateBoardState(board, maximizingPlayer, distanceFunction),
                 piece_move(-1, -1, -1, -1)};
     }
@@ -40,10 +48,18 @@ alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
                 bestEvaluation = evaluation;
                 bestMove = move;
             }
+            alpha = max(alpha, evaluation);
+            if (beta <= alpha) {
+                break;
+            }
         } else {
             if (evaluation < bestEvaluation) {
                 bestEvaluation = evaluation;
                 bestMove = move;
+            }
+            beta = min(beta, evaluation);
+            if (beta <= alpha) {
+                break;
             }
         }
     }

@@ -12,7 +12,7 @@ public:
 
 static std::random_device rd;
 static std::mt19937 gen(rd());
-static std::uniform_int_distribution<int> dis(0, 1);
+static std::uniform_int_distribution<int> dis(0, 2);
 
 static float evaluateBoardState(const Board &board, FieldType playerType,
                                 const HeuristicDistance &distanceFunction) {
