@@ -4,7 +4,7 @@
 #include <limits>
 
 MinmaxPlayer::MinmaxPlayer(int depth, FieldType maximizingPlayer,
-                           const HeuristicDistance &distanceFunction)
+                           const Heuristic &distanceFunction)
     : depth(depth), maximizingPlayer(maximizingPlayer),
       distanceFunction(distanceFunction) {}
 
@@ -18,7 +18,7 @@ void MinmaxPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
-                     const HeuristicDistance &distanceFunction) {
+                     const Heuristic &distanceFunction) {
 
     Board &board = game.getBoard();
     if (depth == 0) {

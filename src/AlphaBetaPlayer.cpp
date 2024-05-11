@@ -3,7 +3,7 @@
 #include <limits>
 
 AlphaBetaPlayer::AlphaBetaPlayer(int depth, FieldType maximizingPlayer,
-                                 const HeuristicDistance &distanceFunction)
+                                 const Heuristic &distanceFunction)
     : depth(depth), maximizingPlayer(maximizingPlayer),
       distanceFunction(distanceFunction){};
 
@@ -18,7 +18,7 @@ void AlphaBetaPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-                           const HeuristicDistance &distanceFunction,
+                           const Heuristic &distanceFunction,
                            float alpha = -numeric_limits<float>::infinity(),
                            float beta = numeric_limits<float>::infinity()) {
 

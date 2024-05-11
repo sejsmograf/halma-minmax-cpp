@@ -126,7 +126,6 @@ vector<piece_move> Board::getPieceMoves(int row, int col) const {
 
 vector<piece_move> Board::getDirectMoves(int row, int col) const {
     vector<piece_move> directMoves;
-
     for (pair<int, int> direction : DIRECTIONS) {
         int adjRow = row + direction.first;
         int adjCol = col + direction.second;

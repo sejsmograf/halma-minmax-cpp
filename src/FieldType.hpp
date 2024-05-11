@@ -1,8 +1,3 @@
 #pragma once
 
-
-enum FieldType {
-	EMPTY,
-	WHITE,
-	BLACK
-};
+enum FieldType { EMPTY, WHITE, BLACK };
