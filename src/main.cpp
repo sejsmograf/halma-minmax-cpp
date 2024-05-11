@@ -5,13 +5,15 @@
 #include "./header/Heuristics.hpp"
 #include "./header/MinmaxPlayer.hpp"
 #include "header/BoardEvaluators.hpp"
+#include "interface/PawnHeuristic.hpp"
 
 int main() {
-    ManhattanDistance distance;
-    DistanceEvaluator evaluator(distance);
+    const PawnHeuristic &distance = ManhattanDistance();
+    CampDistance evaluator(distance);
+    CampCenterDistance centerEvaluator(distance);
     Halma h;
-    MinmaxPlayer player1(evaluator, 2, h.PLAYER_ONE);
-    MinmaxPlayer player2(evaluator, 2, h.PLAYER_TWO);
+    AlphaBetaPlayer player1(evaluator, 3, h.PLAYER_ONE);
+    AlphaBetaPlayer player2(centerEvaluator, 3, h.PLAYER_TWO);
 
     for (int i = 0; i < 1000; i++) {
         player1.makeMove(h);

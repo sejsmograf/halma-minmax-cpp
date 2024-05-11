@@ -1,24 +1,22 @@
 #pragma once
 
+#include "../interface/BoardEvaluator.hpp"
 #include "../interface/HalmaPlayer.hpp"
-#include "../interface/PawnHeuristic.hpp"
-#include "./Heuristics.hpp"
 
 class AlphaBetaPlayer : public HalmaPlayer {
 public:
-    AlphaBetaPlayer(
-        int depth = 1, FieldType maximizingPlayer = FieldType::WHITE,
-        const PawnHeuristic &distanceFunction = ManhattanDistance());
+    AlphaBetaPlayer(const BoardEvaluator &boardEvaluator, int depth = 1,
+                    FieldType maximizingPlayer = FieldType::WHITE);
     void makeMove(Halma &game);
 
 private:
     pair<float, piece_move> alphabeta(Halma &game, int depth,
                                       FieldType maximizingPlayer,
-                                      const PawnHeuristic &distanceFunction,
+                                      const BoardEvaluator &boardEvaluator,
                                       float alpha, float beta);
 
 private:
     int depth;
     FieldType maximizingPlayer;
-    const PawnHeuristic &distanceFunction;
+    const BoardEvaluator &boardEvaluator;
 };

@@ -1,16 +1,17 @@
 #include "./header/AlphaBetaPlayer.hpp"
+#include "interface/BoardEvaluator.hpp"
 #include <algorithm>
 #include <iostream>
 #include <limits>
 
-AlphaBetaPlayer::AlphaBetaPlayer(int depth, FieldType maximizingPlayer,
-                                 const PawnHeuristic &distanceFunction)
-    : depth(depth), maximizingPlayer(maximizingPlayer),
-      distanceFunction(distanceFunction){};
+AlphaBetaPlayer::AlphaBetaPlayer(const BoardEvaluator &boardEvaluator,
+                                 int depth, FieldType maximizingPlayer)
+    : boardEvaluator(boardEvaluator), depth(depth),
+      maximizingPlayer(maximizingPlayer){};
 
 void AlphaBetaPlayer::makeMove(Halma &game) {
     pair<float, piece_move> minmaxResult = alphabeta(
-        game, depth, maximizingPlayer, distanceFunction,
+        game, depth, maximizingPlayer, boardEvaluator,
         -numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
 
     piece_move chosenMove = minmaxResult.second;
@@ -21,13 +22,13 @@ void AlphaBetaPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-                           const PawnHeuristic &distanceFunction,
+                           const BoardEvaluator &boardEvaluator,
                            float alpha = -numeric_limits<float>::infinity(),
                            float beta = numeric_limits<float>::infinity()) {
 
     Board &board = game.getBoard();
     if (depth == 0 || game.checkWinner(maximizingPlayer)) {
-        return {evaluateBoardState(board, maximizingPlayer, distanceFunction),
+        return {boardEvaluator.evaluateBoard(board, maximizingPlayer),
                 piece_move(-1, -1, -1, -1)};
     }
 
@@ -42,7 +43,7 @@ AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
     for (piece_move move : allMoves) {
         game.makeMockMove(move);
         float evaluation = alphabeta(game, depth - 1, maximizingPlayer,
-                                     distanceFunction, alpha, beta)
+                                     boardEvaluator, alpha, beta)
                                .first;
         game.undoMockMove(move);
 
