@@ -1,15 +1,17 @@
 #include <iostream>
 
-#include "AlphaBetaPlayer.hpp"
-#include "Halma.hpp"
-#include "Heuristics.hpp"
-#include "MinmaxPlayer.hpp"
+#include "./header/AlphaBetaPlayer.hpp"
+#include "./header/Halma.hpp"
+#include "./header/Heuristics.hpp"
+#include "./header/MinmaxPlayer.hpp"
+#include "header/BoardEvaluators.hpp"
 
 int main() {
     ManhattanDistance distance;
+    DistanceEvaluator evaluator(distance);
     Halma h;
-    AlphaBetaPlayer player1(2, h.PLAYER_ONE, distance);
-    AlphaBetaPlayer player2(2, h.PLAYER_TWO, distance);
+    MinmaxPlayer player1(evaluator, 2, h.PLAYER_ONE);
+    MinmaxPlayer player2(evaluator, 2, h.PLAYER_TWO);
 
     for (int i = 0; i < 1000; i++) {
         player1.makeMove(h);

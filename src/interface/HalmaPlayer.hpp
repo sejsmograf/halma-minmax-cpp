@@ -1,5 +1,6 @@
 #pragma once
-#include "Halma.hpp"
+#include "../header/Halma.hpp"
+
 class HalmaPlayer {
 public:
     virtual void makeMove(Halma &game) = 0;

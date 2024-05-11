@@ -1,6 +1,6 @@
-#include "Halma.hpp"
-#include "Board.hpp"
-#include "FieldType.hpp"
+#include "./header/Halma.hpp"
+#include "./header/Board.hpp"
+#include "./header/FieldType.hpp"
 
 Halma::Halma() : board(), currentPlayer(PLAYER_ONE), isGameOver(false) {}
 

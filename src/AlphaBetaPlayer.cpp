@@ -1,9 +1,10 @@
-#include "AlphaBetaPlayer.hpp"
+#include "./header/AlphaBetaPlayer.hpp"
 #include <algorithm>
+#include <iostream>
 #include <limits>
 
 AlphaBetaPlayer::AlphaBetaPlayer(int depth, FieldType maximizingPlayer,
-                                 const Heuristic &distanceFunction)
+                                 const PawnHeuristic &distanceFunction)
     : depth(depth), maximizingPlayer(maximizingPlayer),
       distanceFunction(distanceFunction){};
 
@@ -13,12 +14,14 @@ void AlphaBetaPlayer::makeMove(Halma &game) {
         -numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
 
     piece_move chosenMove = minmaxResult.second;
+    cout << "Player " << this->maximizingPlayer
+         << " has chose move with evaluation: " << minmaxResult.first << "\n\n";
     game.makeMove(chosenMove);
 };
 
 pair<float, piece_move>
 AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-                           const Heuristic &distanceFunction,
+                           const PawnHeuristic &distanceFunction,
                            float alpha = -numeric_limits<float>::infinity(),
                            float beta = numeric_limits<float>::infinity()) {
 

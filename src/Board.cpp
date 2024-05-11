@@ -1,5 +1,6 @@
-#include "Board.hpp"
-#include "FieldType.hpp"
+#include "./header/Board.hpp"
+#include "./header/FieldType.hpp"
+
 #include <iostream>
 #include <queue>
 #include <set>

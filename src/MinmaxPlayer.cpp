@@ -1,16 +1,17 @@
-#include "MinmaxPlayer.hpp"
-#include "FieldType.hpp"
-#include "Heuristics.hpp"
+#include "./header/MinmaxPlayer.hpp"
+#include "./header/FieldType.hpp"
+#include "./header/Heuristics.hpp"
+#include "interface/BoardEvaluator.hpp"
 #include <limits>
 
-MinmaxPlayer::MinmaxPlayer(int depth, FieldType maximizingPlayer,
-                           const Heuristic &distanceFunction)
+MinmaxPlayer::MinmaxPlayer(const BoardEvaluator &boardEvaluator, int depth,
+                           FieldType maximizingPlayer)
     : depth(depth), maximizingPlayer(maximizingPlayer),
-      distanceFunction(distanceFunction) {}
+      boardEvaluator(boardEvaluator) {}
 
 void MinmaxPlayer::makeMove(Halma &game) {
     pair<float, piece_move> minmaxResult =
-        minmax(game, depth, maximizingPlayer, distanceFunction);
+        minmax(game, depth, maximizingPlayer, boardEvaluator);
 
     piece_move chosenMove = minmaxResult.second;
     game.makeMove(chosenMove);
@@ -18,11 +19,10 @@ void MinmaxPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
-                     const Heuristic &distanceFunction) {
-
+                     const BoardEvaluator &boardEvaluator) {
     Board &board = game.getBoard();
     if (depth == 0) {
-        return {evaluateBoardState(board, maximizingPlayer, distanceFunction),
+        return {boardEvaluator.evaluateBoard(board, maximizingPlayer),
                 piece_move(-1, -1, -1, -1)};
     }
 
@@ -36,7 +36,7 @@ MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
     for (piece_move move : allMoves) {
         game.makeMockMove(move);
         float evaluation =
-            minmax(game, depth - 1, maximizingPlayer, distanceFunction).first;
+            minmax(game, depth - 1, maximizingPlayer, boardEvaluator).first;
         game.undoMockMove(move);
 
         if (maximize) {

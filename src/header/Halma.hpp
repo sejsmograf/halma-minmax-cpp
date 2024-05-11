@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Board.hpp"
-#include "FieldType.hpp"
+#include "./Board.hpp"
+#include "./FieldType.hpp"
 
 class Halma {
 public:
