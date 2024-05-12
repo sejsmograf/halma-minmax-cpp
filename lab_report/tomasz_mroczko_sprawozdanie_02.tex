@@ -1,0 +1,452 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[hmargin=2cm,vmargin=2.5cm]{geometry}
+\usepackage[polish]{babel}
+\usepackage{listings}
+\usepackage{color}
+% Define Gruvbox colors
+\definecolor{gruvbox-bg}{rgb}{0.156,0.156, 0.156}
+\definecolor{gruvbox-fg}{rgb}{0.92 , 0.85, 0.69}
+\definecolor{gruvbox-comment}{rgb}{0.57, 0.51, 0.45}
+\definecolor{gruvbox-purple}{rgb}{0.82, 0.52, 0.60}
+\definecolor{gruvbox-green}{rgb}{0.72, 0.72, 0.14}
+
+% Define the lstlisting style using Gruvbox colors
+\lstdefinestyle{mystyle}{
+    language=c++,
+    backgroundcolor=\color{gruvbox-bg},   
+    basicstyle=\color{gruvbox-fg}\ttfamily\scriptsize,
+    commentstyle=\color{gruvbox-comment},
+    keywordstyle=\color{gruvbox-purple},
+    stringstyle=\color{gruvbox-green},
+    numberstyle=\tiny\color{gruvbox-comment},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage[table]{xcolor}
+\usepackage{tabularray}
+\usepackage{csquotes}
+
+\usepackage[T1]{fontenc}
+
+
+
+\setlength{\arrayrulewidth}{0.4mm}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+
+\usepackage{enumitem}
+
+\begin{document}
+
+\begin{titlepage}
+  \begin{center}
+    % logo
+    \includegraphics[width=0.5\textwidth]{images/logo.png}~\\[1cm]
+
+    \textsc{Sprawozdanie z zajęć laboratoryjnych\\ Sztuczna inteligencja i inżynieria wiedzy\\[3cm]}
+
+
+    \HRule \\[0.4cm]
+    {\large \bfseries Lista 02 \\ Minmax, Alphabeta \\[0.4cm]}
+    \HRule \\[8cm]
+
+
+    Tomasz Mroczko, 266604 \\[3cm]
+
+    \vfill
+
+    {\today}
+
+  \end{center}
+\end{titlepage}
+
+
+\newpage
+\tableofcontents
+\newpage
+
+  % \begin{figure}[H]
+  %   \centering
+  %   \includegraphics[width=0.8\textwidth]{2024-04-07-13-00-26.png} 
+  % \end{figure}
+
+\section{Wprowadzenie}
+Celem projektu było zaimplementowanie algorytmu 
+\textit{Minmax} oraz jego ulepszonej wersji \textit{Alphabeta} oraz zastosowanie 
+ich do gry w \textit{Halma}. Zadanie wykonane zostało najpierw w języku \textit{Python},
+jednak ze względu na interpretowany charakter tego języka oraz jego słabą wydajność, 
+zdecydowano się na przepisanie algorytmów do języka \textit{C++}.
+
+
+
+\section{Zadania}
+
+\subsection{Zdefiniowanie stanu gry i funkcji generującej możliwe ruchy dla gracza}
+\subsubsection{Stan gry}
+Stan gry jest reprezentowany przez obiekt klasy \textit{Board},
+która przechowuje tablicę dwuwymiarową \textit{16x16} reprezentującą planszę do gry.
+Każde pole planszy jest reprezentowane przez jedną z wartości 
+enumeracji \textit{FieldType}
+\begin{lstlisting}
+enum FieldType {
+	EMPTY,
+	WHITE,
+	BLACK
+};
+\end{lstlisting}
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+
+
+Deklaracja klasy \textit{Board} wygląda następująco
+\begin{lstlisting}
+class Board {
+public:
+    static const int BOARD_SIZE = 16;
+    static const int PIECE_COUNT = 19;
+    static const vector<pair<int, int>> DIRECTIONS;
+    static const unordered_map<FieldType, vector<pair<int, int>>> PLAYER_CAMPS;
+
+    Board();
+    vector<piece_move> getPlayerMoves(FieldType playerType) const;
+    vector<pair<int, int>> getPlayerPositions(FieldType playerType) const;
+    vector<pair<int, int>> getPlayerGoalCamp(FieldType playerType) const;
+    int playerPiecesInGoalCamp(FieldType playerType) const;
+    pair<int, int> getEmptyGoal(vector<pair<int, int>> playerGoalCamp) const;
+    void makeMove(piece_move move);
+    void undoMove(piece_move move);
+    void printBoard() const;
+
+private:
+    FieldType state[BOARD_SIZE][BOARD_SIZE];
+    vector<piece_move> getPieceMoves(int row, int col) const;
+    vector<piece_move> getDirectMoves(int row, int col) const;
+    vector<piece_move> getJumpMoves(int row, int col) const;
+    bool isWithinBounds(int row, int col) const;
+    void initializeDefaultBoard();
+};
+\end{lstlisting}
+Statyczne pola klasy przechowują informacje o 
+rozmiarze planszy, liczbie pionków, kierunkach ruchu oraz
+pozycjach obozów graczy. Metody klasy zostaną opisane w dalszej
+części sprawozdania. 
+Stan planszy przechowywany jest w tablicy dwuwymiarowej \textit{state}.
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+
+\subsubsection{Metoda genrująca ruchy dla gracza}
+Ruchu danego gracza generowane sa przez metodę 
+\textit{Board.getPlayerMoves(FieldType playerType)}.
+\begin{lstlisting}
+vector<piece_move> Board::getPlayerMoves(FieldType playerType) const {
+    vector<pair<int, int>> playerPositions = getPlayerPositions(playerType);
+    vector<piece_move> allMoves;
+
+    for (const pair<int, int> &position : playerPositions) {
+        int row = position.first;
+        int col = position.second;
+
+        vector<piece_move> moves = getPieceMoves(row, col);
+        allMoves.insert(allMoves.end(), moves.begin(), moves.end());
+    }
+    return allMoves;
+}
+\end{lstlisting}
+Metoda ta pobiera pozycje wszystkich pionków gracza, 
+a następnie dla każdego z nich generuje możliwe ruchy
+za pomocą metody \textit{Board.getPieceMoves(int row, int col)}.
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+
+Metoda \textit{Board.getPieceMoves(int row, int col)} 
+generuje możliwe ruchy dla pionka na pozycji \textit{(row, col)}.
+Wywołuje ona metody \textit{Board.getDirectMoves(int row, int col)} oraz
+\textit{Board.getJumpMoves(int row, int col)}, a następnie 
+łączy wyniki tych metod.
+\begin{lstlisting}
+vector<piece_move> Board::getPieceMoves(int row, int col) const {
+    vector<piece_move> moves = getDirectMoves(row, col);
+    vector<piece_move> jumpMoves = getJumpMoves(row, col);
+    for (piece_move move : jumpMoves) {
+        moves.push_back(move);
+    }
+    return moves;
+};
+\end{lstlisting}
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+
+Generowanie bezpośrednich ruchów realizoawnane jest przez metodę
+\textit{Board.getDirectMoves(int row, int col)}.
+\begin{lstlisting}
+vector<piece_move> Board::getDirectMoves(int row, int col) const {
+    vector<piece_move> directMoves;
+    for (pair<int, int> direction : DIRECTIONS) {
+        int adjRow = row + direction.first;
+        int adjCol = col + direction.second;
+        if (isWithinBounds(adjRow, adjCol) &&
+            state[adjRow][adjCol] == FieldType::EMPTY) {
+            piece_move move = {row, col, adjRow, adjCol};
+            directMoves.push_back(move);
+        }
+    }
+    return directMoves;
+};
+\end{lstlisting}
+Dla każdego z kierunków ruchu sprawdzane jest czy pole jest puste.
+Jeśli tak, to zapisywany jest prawidłowy ruch.
+
+
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+Generowanie ruchów możliwych do wykonania poprzez skakanie 
+realizowane jest przez metodę \textit{Board.getJumpMoves(int row, int col)}.
+\begin{lstlisting}
+vector<piece_move> Board::getJumpMoves(int row, int col) const {
+    vector<piece_move> jumpMoves;
+
+    queue<pair<int, int>> toVisit;
+    set<pair<int, int>> visited;
+
+    toVisit.push({row, col});
+    visited.insert({row, col});
+
+    while (!toVisit.empty()) {
+        pair<int, int> currPos = toVisit.front();
+        toVisit.pop();
+
+        for (pair<int, int> direction : DIRECTIONS) {
+            int adjRow = currPos.first + direction.first;
+            int adjCol = currPos.second + direction.second;
+            if (!isWithinBounds(adjRow, adjCol) ||
+                state[adjRow][adjCol] == FieldType::EMPTY) {
+                continue;
+            }
+            int jumpRow = adjRow + direction.first;
+            int jumpCol = adjCol + direction.second;
+
+            if (!isWithinBounds(jumpRow, jumpCol) ||
+                state[jumpRow][jumpCol] != FieldType::EMPTY) {
+                continue;
+            }
+
+            if (!visited.contains({jumpRow, jumpCol})) {
+                visited.insert({jumpRow, jumpCol});
+                toVisit.push({jumpRow, jumpCol});
+                piece_move move = {row, col, jumpRow, jumpCol};
+                jumpMoves.push_back(move);
+            }
+        }
+    }
+    return jumpMoves;
+};
+\end{lstlisting}
+Metoda ta korzysta z algorytmu BFS z dodatkowymi ograniczeniami,
+w celu odwiedzenia wszystkich możliwych pól na które można skoczyć.
+Dla każdego z kierunków, sprawdzane jest czy pole jest zajęte
+oraz czy pole za nim jest puste. Jeśli tak, to do kolejki 
+dodawane jest to pole, oraz ruch jest zapisywany jako możliwy.
+Dopóki kolejka nie jest pusta, algorytm kontynuuje przeszukiwanie.
+
+
+Warto zaznaczyć że ciekawym i naturalnym 
+podejściem do generowanie ruchów jest także podejście rekurencyjne.
+W tym przypadku, z moich obserwacji wynika, że podejście iteracyjne 
+jest jednak bardziej wydajne oraz bardziej naturalne w kontekście
+przeszukiwania możliwych ruchów w grze planszowej.
+\vspace{0.5cm}
+\hrule
+\vspace{1cm}
+
+
+
+\subsubsection{Klasa reprezentująca grę}
+Dodatkowo, klasą która posiada obiekt klasy \textit{Board} oraz
+metody do przeprowadzania gry jest klasa \textit{Halma}.
+\begin{lstlisting}
+class Halma {
+public:
+    static const FieldType PLAYER_ONE = FieldType::WHITE;
+    static const FieldType PLAYER_TWO = FieldType::BLACK;
+    Halma();
+    void printBoard() const;
+    void switchTurn();
+    void makeMove(piece_move move);
+    void makeMockMove(piece_move move);
+    void undoMockMove(piece_move move);
+    bool checkWinner(FieldType playerType);
+    void gameFinished();
+    Board &getBoard();
+    FieldType getCurrentPlayer();
+    bool isGameOver;
+private:
+    FieldType currentPlayer;
+    Board board;
+};
+\end{lstlisting}
+Klasa ta udostępnia metody do przeprowadzenia oraz symulowania gry. 
+Metody \textit{makeMockMove} oraz \textit{undoMockMove} służą do
+symulowania ruchów oraz ich cofania. Modyfikują one stan planszy,
+jednak zawsze zostają wycofane. Pozwala to na przeprowadzanie 
+symulacji ruchów w algorytmach \textit{Minmax} oraz \textit{Alphabeta}, 
+bez konieczności kopiowania planszy, co pozwala na optymalizację 
+zużycia pamięcia oraz (najpradowpodobniej) czasu.
+
+
+\subsection{Zbudowanie zbioru heurystyk - 3 różne strategie}
+\subsubsection{Struktura programu} 
+Program gwarantuje klasę czysto wirtualną (interfejs) \textit{HalmaPlayer},
+który posiada jendą metodę \textit{makeMove}. Gracze 
+dziedziczą po tej klasie, implementując swoje strategie.
+\begin{lstlisting}
+class HalmaPlayer {
+public:
+    virtual void makeMove(Halma &game) = 0;
+};
+\end{lstlisting}
+
+
+Kolejny interfejs \textit{BoardEvaluator} posiada metodę \textit{evaluateBoard}.
+Za pomocą tego interfejsu realizowane są różne oceny stanu planszy, 
+realizowane następnie przez graczy implementujących interfejs \textit{HalmaPlayer}.
+\begin{lstlisting}
+class BoardEvaluator {
+public:
+    virtual float evaluateBoard(const Board &board, FieldType player) const = 0;
+};
+\end{lstlisting}
+Metoda przyjmuje referencję do planszy gry oraz kolor gracza, którego pozycja 
+jest ewaluowana.
+
+Ostanim interfejsem używanym do oceny stanu gry jest \textit{PawnHeuristic}.
+Pozwala on ocenić odległość pojdeynczego pionka od celu.
+\begin{lstlisting}
+class PawnHeuristic {
+public:
+    virtual float evaluatePawnScore(int row, int col, int goalRow,
+                                    int goalCol) const = 0;
+};
+\end{lstlisting}
+
+
+\subsubsection{Heurystyki}
+\begin{itemize}
+  \item \textbf{Heurystyka 1} - Odległość Manhattan od celu w obozie przeciwnika\\
+  Pierwsza heurestyka polega na ocenie odległości pionków od celu.
+  W każdej ocenie planszy, wybierany jest cel pionków. 
+  Celem jest pierwsze puste pole w obozie przeciwnika.
+  Ocena jest obliczana następująco:
+  dla każdego pionka obliczana jest odległość Manhattan od celu.
+  Następnie jest ona podnoszona do kwadratu (w celu "zachęty" do opuszczenia obozu).
+  Od ostatecznej oceny odejmowana jest ta odległość (im mniejsza, tym lepiej).
+  Dodatkowo, mocno premiowane są pionki w obozie przeciwnika. W celu 
+  zwiększenia różnorodności gry oraz zniwelowania ryzyka zablokowania 
+  pionków w cyklu, ocena jest modyfikowana przez losową wartość z przedziału (0, 2).
+\begin{lstlisting}
+CornerDistance::CornerDistance(const PawnHeuristic &pawnHeuristic)
+    : pawnHeuristic(pawnHeuristic){};
+
+float CornerDistance::evaluateBoard(const Board &board,
+                                    FieldType player) const {
+
+    vector<pair<int, int>> goalCamp = board.getPlayerGoalCamp(player);
+    vector<pair<int, int>> playerCamp = board.PLAYER_CAMPS.at(player);
+    pair<int, int> goalPosition = board.getEmptyGoal(goalCamp);
+    vector<pair<int, int>> playerPositions = board.getPlayerPositions(player);
+    float evaluation = 0;
+
+    for (const pair<int, int> &position : playerPositions) {
+        int row = position.first;
+        int col = position.second;
+        float penalty = pawnHeuristic.evaluatePawnScore(
+            row, col, goalPosition.first, goalPosition.second);
+        evaluation -= squareDistancePenalty(penalty);
+
+        bool isInGoalCamp = false;
+        for (const auto &goal : goalCamp) {
+            if (goal == position) {
+                isInGoalCamp = true;
+                break;
+            }
+        }
+        if (isInGoalCamp) {
+            evaluation += 1000;
+        }
+        evaluation += dis(gen);
+    }
+
+    return evaluation;
+};
+
+float CornerDistance::squareDistancePenalty(float penalty) const {
+    return penalty * penalty;
+}
+\end{lstlisting}
+Powyżej znajduje się kod źródłowy klasy \textit{DistanceEvaluator}.
+Pierwsza heurestyka, to po prostu utworzenie jej instancji 
+z odpowiednią heurystyką dla pionków.
+\begin{lstlisting}
+const PawnHeuristic &distance = ManhattanDistance();
+CornerDistance evaluator(distance);
+\end{lstlisting}
+\item \textbf{Heurystyka 2} - Odległość od celu w obozie przeciwnika, z uwzględnieniem 
+odległości od środka planszy\\
+W tej heurystyce, pod uwagę brana jest zarowno odległość od celu w obozie przeciwnika,
+jak i odległość od środka planszy. Odległość od środka planszy niest jest 
+tak mocno premiowana jak odległość od celu, jednak nakłania ona pionki do 
+pozostawanie trochę dłużej na środku planszy, co może pozwolić na szybsze 
+przemieszczanie się pionków w przyszłości. Minusem tej strategii,
+jest fakt, że pionki pozostające na planszy mogą pozwolić także przeciwnikowi
+na szybsze przemieszczanie się. Kod źródłowy tej heurestyki jest 
+bardzo podobny do poprzedniej, z tą rożnicą, że do ewaluacji każdego pionka 
+odejmowana jest także odległość od środka planszy.
+\begin{lstlisting}
+float goalDistance = pawnHeuristic.evaluatePawnScore(
+    row, col, goalPosition.first, goalPosition.second);
+float centerDistance = pawnHeuristic.evaluatePawnScore(row, col, 8, 8);
+
+evaluation -= squareDistancePenalty(goalDistance);
+evaluation -= centerDistance;
+\end{lstlisting}
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
