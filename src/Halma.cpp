@@ -2,7 +2,8 @@
 #include "./header/Board.hpp"
 #include "./header/FieldType.hpp"
 
-Halma::Halma() : board(), currentPlayer(PLAYER_ONE), isGameOver(false) {}
+Halma::Halma(vector<string> inputLines)
+    : board(inputLines), currentPlayer(PLAYER_ONE), isGameOver(false) {}
 
 void Halma::printBoard() const { board.printBoard(); }
 

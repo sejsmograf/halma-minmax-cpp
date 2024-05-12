@@ -2,12 +2,13 @@
 
 #include "./Board.hpp"
 #include "./FieldType.hpp"
+#include <string>
 
 class Halma {
 public:
     static const FieldType PLAYER_ONE = FieldType::WHITE;
     static const FieldType PLAYER_TWO = FieldType::BLACK;
-    Halma();
+    Halma(vector<string> inputLines = {});
     void printBoard() const;
     void switchTurn();
     void makeMove(piece_move move);

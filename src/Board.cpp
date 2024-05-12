@@ -4,6 +4,8 @@
 #include <iostream>
 #include <queue>
 #include <set>
+#include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -33,7 +35,7 @@ const vector<pair<int, int>> Board::DIRECTIONS = {
 };
 // clang-format on
 
-Board::Board() { initializeDefaultBoard(); };
+Board::Board(vector<string> inputLines) { initializeBoard(inputLines); };
 
 vector<piece_move> Board::getPlayerMoves(FieldType playerType) const {
     vector<pair<int, int>> playerPositions = getPlayerPositions(playerType);
@@ -182,7 +184,15 @@ bool Board::isWithinBounds(int row, int col) const {
     return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }
 
-void Board::initializeDefaultBoard() {
+void Board::initializeBoard(vector<string> inputLines) {
+    if (inputLines.empty()) {
+        initializeDefault();
+    } else {
+        initializeFromStdInput(inputLines);
+    }
+};
+
+void Board::initializeDefault() {
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
             state[row][col] = FieldType::EMPTY;
@@ -199,5 +209,35 @@ void Board::initializeDefaultBoard() {
         int row = pos.first;
         int col = pos.second;
         state[row][col] = FieldType::WHITE;
+    }
+};
+
+void Board::initializeFromStdInput(vector<string> inputLines) {
+    if (inputLines.size() != BOARD_SIZE) {
+        throw new invalid_argument("Invalid board size passed");
+    }
+
+    string word;
+    int playerOneCount = 0;
+    int playerTwoCount = 0;
+    for (int row = 0; row < inputLines.size(); row++) {
+        int col = 0;
+        stringstream ss(inputLines[row]);
+        while (ss >> word) {
+            if (word == "1") {
+                state[row][col] = FieldType::WHITE;
+                playerOneCount++;
+            } else if (word == "2") {
+                state[row][col] = FieldType::BLACK;
+                playerTwoCount++;
+            } else {
+                state[row][col] = FieldType::EMPTY;
+            }
+            col++;
+        }
+    }
+    if (playerOneCount != PIECE_COUNT || playerTwoCount != PIECE_COUNT) {
+        throw new invalid_argument(
+            "Invalid board state passed : invalid piece count");
     }
 };

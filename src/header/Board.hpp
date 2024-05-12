@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -19,7 +20,7 @@ public:
     static const vector<pair<int, int>> DIRECTIONS;
     static const unordered_map<FieldType, vector<pair<int, int>>> PLAYER_CAMPS;
 
-    Board();
+    Board(vector<string> inputLines);
     vector<piece_move> getPlayerMoves(FieldType playerType) const;
     vector<pair<int, int>> getPlayerPositions(FieldType playerType) const;
     vector<pair<int, int>> getPlayerGoalCamp(FieldType playerType) const;
@@ -35,5 +36,7 @@ private:
     vector<piece_move> getDirectMoves(int row, int col) const;
     vector<piece_move> getJumpMoves(int row, int col) const;
     bool isWithinBounds(int row, int col) const;
-    void initializeDefaultBoard();
+    void initializeBoard(vector<string> inputLines);
+    void initializeFromStdInput(vector<string> inputLines);
+    void initializeDefault();
 };
