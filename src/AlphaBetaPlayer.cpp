@@ -1,10 +1,10 @@
 #include "./header/AlphaBetaPlayer.hpp"
-#include "interface/BoardEvaluator.hpp"
+#include "./interface/IBoardEvaluator.hpp"
 #include <algorithm>
 #include <iostream>
 #include <limits>
 
-AlphaBetaPlayer::AlphaBetaPlayer(const BoardEvaluator &boardEvaluator,
+AlphaBetaPlayer::AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator,
                                  int depth, FieldType maximizingPlayer)
     : boardEvaluator(boardEvaluator), depth(depth),
       maximizingPlayer(maximizingPlayer){};
@@ -22,7 +22,7 @@ void AlphaBetaPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-                           const BoardEvaluator &boardEvaluator,
+                           const IBoardEvaluator &boardEvaluator,
                            float alpha = -numeric_limits<float>::infinity(),
                            float beta = numeric_limits<float>::infinity()) {
 

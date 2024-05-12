@@ -1,14 +1,16 @@
 #include "./header/BoardEvaluators.hpp"
 
-std::random_device CampDistance::rd;
-std::mt19937 CampDistance::gen(CampDistance::rd());
-std::uniform_int_distribution<int> CampDistance::dis(0, 2);
+// CampDistanceEvaluator
+std::random_device CampDistanceEvaluator::rd;
+std::mt19937 CampDistanceEvaluator::gen(CampDistanceEvaluator::rd());
+std::uniform_int_distribution<int> CampDistanceEvaluator::dis(0, 2);
 
-// CornerDistance
-CampDistance::CampDistance(const PawnHeuristic &pawnHeuristic)
+CampDistanceEvaluator::CampDistanceEvaluator(
+    const IPawnHeuristic &pawnHeuristic)
     : pawnHeuristic(pawnHeuristic){};
 
-float CampDistance::evaluateBoard(const Board &board, FieldType player) const {
+float CampDistanceEvaluator::evaluateBoard(const Board &board,
+                                           FieldType player) const {
 
     vector<pair<int, int>> goalCamp = board.getPlayerGoalCamp(player);
     vector<pair<int, int>> playerCamp = board.PLAYER_CAMPS.at(player);
@@ -39,20 +41,22 @@ float CampDistance::evaluateBoard(const Board &board, FieldType player) const {
     return evaluation;
 };
 
-float CampDistance::squareDistancePenalty(float penalty) const {
+float CampDistanceEvaluator::squareDistancePenalty(float penalty) const {
     return penalty * penalty;
 }
 
-// CornerCenterDistance
-std::random_device CampCenterDistance::rd;
-std::mt19937 CampCenterDistance::gen(CampCenterDistance::rd());
-std::uniform_int_distribution<int> CampCenterDistance::dis(0, 2);
+// CampAndCenterDistanceEvaluator
+std::random_device CampAndCenterDistanceEvaluator::rd;
+std::mt19937
+    CampAndCenterDistanceEvaluator::gen(CampAndCenterDistanceEvaluator::rd());
+std::uniform_int_distribution<int> CampAndCenterDistanceEvaluator::dis(0, 2);
 
-CampCenterDistance::CampCenterDistance(const PawnHeuristic &pawnHeuristic)
+CampAndCenterDistanceEvaluator::CampAndCenterDistanceEvaluator(
+    const IPawnHeuristic &pawnHeuristic)
     : pawnHeuristic(pawnHeuristic){};
 
-float CampCenterDistance::evaluateBoard(const Board &board,
-                                        FieldType player) const {
+float CampAndCenterDistanceEvaluator::evaluateBoard(const Board &board,
+                                                    FieldType player) const {
 
     vector<pair<int, int>> goalCamp = board.getPlayerGoalCamp(player);
     vector<pair<int, int>> playerCamp = board.PLAYER_CAMPS.at(player);
@@ -65,7 +69,8 @@ float CampCenterDistance::evaluateBoard(const Board &board,
         int col = position.second;
         float goalDistance = pawnHeuristic.evaluatePawnScore(
             row, col, goalPosition.first, goalPosition.second);
-        float centerDistance = pawnHeuristic.evaluatePawnScore(row, col, 8, 8);
+        float centerDistance = pawnHeuristic.evaluatePawnScore(
+            row, col, board.BOARD_SIZE / 2, board.BOARD_SIZE / 2);
 
         evaluation -= squareDistancePenalty(goalDistance);
         evaluation -= centerDistance;
@@ -86,6 +91,55 @@ float CampCenterDistance::evaluateBoard(const Board &board,
     return evaluation;
 };
 
-float CampCenterDistance::squareDistancePenalty(float penalty) const {
+float CampAndCenterDistanceEvaluator::squareDistancePenalty(
+    float penalty) const {
+    return penalty * penalty;
+}
+
+// MovePotential
+std::random_device MovePotentialEvaluator::rd;
+std::mt19937 MovePotentialEvaluator::gen(MovePotentialEvaluator::rd());
+std::uniform_int_distribution<int> MovePotentialEvaluator::dis(0, 2);
+
+MovePotentialEvaluator::MovePotentialEvaluator(
+    const IPawnHeuristic &pawnHeuristic)
+    : pawnHeuristic(pawnHeuristic){};
+
+float MovePotentialEvaluator::evaluateBoard(const Board &board,
+                                            FieldType player) const {
+
+    vector<pair<int, int>> goalCamp = board.getPlayerGoalCamp(player);
+    vector<pair<int, int>> playerCamp = board.PLAYER_CAMPS.at(player);
+    pair<int, int> goalPosition = board.getEmptyGoal(goalCamp);
+    vector<pair<int, int>> playerPositions = board.getPlayerPositions(player);
+    float evaluation = 0;
+
+    for (const pair<int, int> &position : playerPositions) {
+        int row = position.first;
+        int col = position.second;
+        float goalDistance = pawnHeuristic.evaluatePawnScore(
+            row, col, goalPosition.first, goalPosition.second);
+        int possiblePieceMoves = board.getPieceMoves(row, col).size();
+
+        evaluation -= squareDistancePenalty(goalDistance);
+        evaluation += possiblePieceMoves;
+
+        bool isInGoalCamp = false;
+        for (const auto &goal : goalCamp) {
+            if (goal == position) {
+                isInGoalCamp = true;
+                break;
+            }
+        }
+        if (isInGoalCamp) {
+            evaluation += 1000;
+        }
+        evaluation += dis(gen);
+    }
+
+    return evaluation;
+};
+
+float MovePotentialEvaluator::squareDistancePenalty(float penalty) const {
     return penalty * penalty;
 }

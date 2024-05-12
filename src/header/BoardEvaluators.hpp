@@ -1,31 +1,44 @@
 #pragma once
 
-#include "../interface/BoardEvaluator.hpp"
-#include "../interface/PawnHeuristic.hpp"
+#include "../interface/IBoardEvaluator.hpp"
+#include "../interface/IPawnHeuristic.hpp"
 #include <random>
 
-class CampDistance : public BoardEvaluator {
+class CampDistanceEvaluator : public IBoardEvaluator {
 public:
-    CampDistance(const PawnHeuristic &pawnHeuristic);
+    CampDistanceEvaluator(const IPawnHeuristic &pawnHeuristic);
     float evaluateBoard(const Board &board, FieldType player) const;
 
 private:
     static std::random_device rd;
     static std::mt19937 gen;
     static std::uniform_int_distribution<int> dis;
-    const PawnHeuristic &pawnHeuristic;
+    const IPawnHeuristic &pawnHeuristic;
     float squareDistancePenalty(float penalty) const;
 };
 
-class CampCenterDistance : public BoardEvaluator {
+class CampAndCenterDistanceEvaluator : public IBoardEvaluator {
 public:
-    CampCenterDistance(const PawnHeuristic &pawnHeuristic);
+    CampAndCenterDistanceEvaluator(const IPawnHeuristic &pawnHeuristic);
     float evaluateBoard(const Board &board, FieldType player) const;
 
 private:
     static std::random_device rd;
     static std::mt19937 gen;
     static std::uniform_int_distribution<int> dis;
-    const PawnHeuristic &pawnHeuristic;
+    const IPawnHeuristic &pawnHeuristic;
+    float squareDistancePenalty(float penalty) const;
+};
+
+class MovePotentialEvaluator : public IBoardEvaluator {
+public:
+    MovePotentialEvaluator(const IPawnHeuristic &pawnHeuristic);
+    float evaluateBoard(const Board &board, FieldType player) const;
+
+private:
+    static std::random_device rd;
+    static std::mt19937 gen;
+    static std::uniform_int_distribution<int> dis;
+    const IPawnHeuristic &pawnHeuristic;
     float squareDistancePenalty(float penalty) const;
 };

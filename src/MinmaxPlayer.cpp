@@ -1,10 +1,9 @@
 #include "./header/MinmaxPlayer.hpp"
 #include "./header/FieldType.hpp"
-#include "./header/Heuristics.hpp"
-#include "interface/BoardEvaluator.hpp"
+#include "interface/IBoardEvaluator.hpp"
 #include <limits>
 
-MinmaxPlayer::MinmaxPlayer(const BoardEvaluator &boardEvaluator, int depth,
+MinmaxPlayer::MinmaxPlayer(const IBoardEvaluator &boardEvaluator, int depth,
                            FieldType maximizingPlayer)
     : depth(depth), maximizingPlayer(maximizingPlayer),
       boardEvaluator(boardEvaluator) {}
@@ -19,7 +18,7 @@ void MinmaxPlayer::makeMove(Halma &game) {
 
 pair<float, piece_move>
 MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
-                     const BoardEvaluator &boardEvaluator) {
+                     const IBoardEvaluator &boardEvaluator) {
     Board &board = game.getBoard();
     if (depth == 0) {
         return {boardEvaluator.evaluateBoard(board, maximizingPlayer),

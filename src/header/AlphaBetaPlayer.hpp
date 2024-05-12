@@ -1,22 +1,22 @@
 #pragma once
 
-#include "../interface/BoardEvaluator.hpp"
-#include "../interface/HalmaPlayer.hpp"
+#include "../interface/IBoardEvaluator.hpp"
+#include "../interface/IHalmaPlayer.hpp"
 
-class AlphaBetaPlayer : public HalmaPlayer {
+class AlphaBetaPlayer : public IHalmaPlayer {
 public:
-    AlphaBetaPlayer(const BoardEvaluator &boardEvaluator, int depth = 1,
+    AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator, int depth = 1,
                     FieldType maximizingPlayer = FieldType::WHITE);
     void makeMove(Halma &game);
 
 private:
     pair<float, piece_move> alphabeta(Halma &game, int depth,
                                       FieldType maximizingPlayer,
-                                      const BoardEvaluator &boardEvaluator,
+                                      const IBoardEvaluator &boardEvaluator,
                                       float alpha, float beta);
 
 private:
     int depth;
     FieldType maximizingPlayer;
-    const BoardEvaluator &boardEvaluator;
+    const IBoardEvaluator &boardEvaluator;
 };

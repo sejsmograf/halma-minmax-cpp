@@ -1,11 +1,11 @@
 #pragma once
 #include <random>
 
-#include "../interface/PawnHeuristic.hpp"
+#include "../interface/IPawnHeuristic.hpp"
 #include "./Board.hpp"
 #include "./FieldType.hpp"
 
-class ManhattanDistance : public PawnHeuristic {
+class ManhattanDistance : public IPawnHeuristic {
 public:
     float evaluatePawnScore(int row, int col, int goalRow, int goalCol) const;
 };
@@ -17,7 +17,7 @@ static std::uniform_int_distribution<int> dis(0, 2);
 static float squareDistancePenalty(float penalty) { return penalty * penalty; }
 
 static float evaluateBoardState(const Board &board, FieldType playerType,
-                                const PawnHeuristic &distanceFunction) {
+                                const IPawnHeuristic &distanceFunction) {
     vector<pair<int, int>> goalCamp = board.getPlayerGoalCamp(playerType);
     vector<pair<int, int>> playerCamp = board.PLAYER_CAMPS.at(playerType);
     pair<int, int> goalPosition = board.getEmptyGoal(goalCamp);

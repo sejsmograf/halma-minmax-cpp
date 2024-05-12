@@ -22,6 +22,7 @@ public:
 
     Board(vector<string> inputLines);
     vector<piece_move> getPlayerMoves(FieldType playerType) const;
+    vector<piece_move> getPieceMoves(int row, int col) const;
     vector<pair<int, int>> getPlayerPositions(FieldType playerType) const;
     vector<pair<int, int>> getPlayerGoalCamp(FieldType playerType) const;
     int playerPiecesInGoalCamp(FieldType playerType) const;
@@ -32,7 +33,6 @@ public:
 
 private:
     FieldType state[BOARD_SIZE][BOARD_SIZE];
-    vector<piece_move> getPieceMoves(int row, int col) const;
     vector<piece_move> getDirectMoves(int row, int col) const;
     vector<piece_move> getJumpMoves(int row, int col) const;
     bool isWithinBounds(int row, int col) const;
