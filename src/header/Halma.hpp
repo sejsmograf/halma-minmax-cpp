@@ -9,7 +9,7 @@ class Halma {
 public:
     static const FieldType PLAYER_ONE = FieldType::WHITE;
     static const FieldType PLAYER_TWO = FieldType::BLACK;
-    Halma(IHalmaPlayer *playerOne = nullptr, IHalmaPlayer *playerTwo = nullptr,
+    Halma(IHalmaPlayer *playerOne, IHalmaPlayer *playerTwo,
           vector<string> inputLines = {});
     void printBoard() const;
     void switchTurn();
@@ -21,7 +21,7 @@ public:
     bool checkWinner(FieldType playerType) const;
     void gameFinished();
     int playGame(bool printBoard = true);
-    int playTurn();
+    int playTurn(bool printBoard = true);
     Board &getBoard();
     FieldType getCurrentPlayer();
     bool isGameOver;

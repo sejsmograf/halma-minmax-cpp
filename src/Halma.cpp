@@ -3,10 +3,14 @@
 #include "./header/FieldType.hpp"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 Halma::Halma(IHalmaPlayer *playerOne, IHalmaPlayer *playerTwo,
              vector<string> inputLines)
     : board(inputLines), currentPlayer(PLAYER_ONE), isGameOver(false) {
+    if (playerOne == nullptr || playerTwo == nullptr) {
+        throw invalid_argument("Canont initialize game with nullptr player");
+    }
     setPlayerOne(playerOne);
     setPlayerTwo(playerTwo);
 }
@@ -25,16 +29,10 @@ void Halma::makeMove(piece_move move) {
     switchTurn();
 }
 void Halma::setPlayerOne(IHalmaPlayer *player) {
-    if (player == nullptr) {
-        return;
-    }
     this->playerOne = player;
     player->setPlayer(PLAYER_ONE);
 };
 void Halma::setPlayerTwo(IHalmaPlayer *player) {
-    if (player == nullptr) {
-        return;
-    }
     this->playerTwo = player;
     player->setPlayer(PLAYER_TWO);
 }
@@ -57,35 +55,27 @@ void Halma::gameFinished() { isGameOver = true; }
 
 int Halma::playGame(bool print) {
     int visitedNodes = 0;
-    if (playerOne != nullptr && playerTwo != nullptr) {
-        while (!isGameOver) {
-            visitedNodes += playTurn();
-            if (print) {
-                printBoard();
-                cout << "\n\n\n";
-            }
-        }
-    } else if (playerOne != nullptr) {
-        playTurn();
-        if (print) {
-            printBoard();
-            cout << "\n\n\n";
-        }
+
+    while (!isGameOver) {
+        playTurn(print);
     }
 
     return visitedNodes;
 }
 
-int Halma::playTurn() {
+int Halma::playTurn(bool print) {
     search_result foundMove;
-    if (currentPlayer == PLAYER_ONE && playerOne != nullptr) {
+    if (currentPlayer == PLAYER_ONE) {
         search_result foundMove = playerOne->chooseMove(*this);
-        makeMove(foundMove.move);
-    } else if (currentPlayer == PLAYER_TWO && playerTwo != nullptr) {
+    } else if (currentPlayer == PLAYER_TWO) {
         search_result foundMove = playerTwo->chooseMove(*this);
-        makeMove(foundMove.move);
     }
 
+    makeMove(foundMove.move);
+    if (print) {
+        printBoard();
+        std::cout << "\n\n";
+    }
     return foundMove.visitedNodes;
 }
 

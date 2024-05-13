@@ -6,15 +6,15 @@
 MinmaxPlayer::MinmaxPlayer(const IBoardEvaluator &boardEvaluator, int depth)
     : depth(depth), boardEvaluator(boardEvaluator) {}
 
-search_result MinmaxPlayer::chooseMove(Halma &game) {
+search_result MinmaxPlayer::chooseMove(Halma &game) const {
     search_result minmaxResult = minmax(game, depth, player, boardEvaluator);
 
     return minmaxResult;
 }
 
-search_result MinmaxPlayer::minmax(Halma &game, int depth,
-                                   FieldType maximizingPlayer,
-                                   const IBoardEvaluator &boardEvaluator) {
+search_result
+MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
+                     const IBoardEvaluator &boardEvaluator) const {
     int visitedNodes = 0;
     Board &board = game.getBoard();
     if (depth == 0) {

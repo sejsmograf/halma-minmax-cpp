@@ -9,11 +9,11 @@ using namespace std;
 class MinmaxPlayer : public IHalmaPlayer {
 public:
     MinmaxPlayer(const IBoardEvaluator &boardEvaluator, int depth = 1);
-    search_result chooseMove(Halma &game);
+    search_result chooseMove(Halma &game) const;
 
 private:
     search_result minmax(Halma &game, int depth, FieldType maximizingPlayer,
-                         const IBoardEvaluator &boardEvaluator);
+                         const IBoardEvaluator &boardEvaluator) const;
 
 private:
     int depth;

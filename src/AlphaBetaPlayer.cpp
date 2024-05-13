@@ -7,7 +7,7 @@ AlphaBetaPlayer::AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator,
                                  int depth)
     : boardEvaluator(boardEvaluator), depth(depth){};
 
-search_result AlphaBetaPlayer::chooseMove(Halma &game) {
+search_result AlphaBetaPlayer::chooseMove(Halma &game) const {
     search_result result = alphabeta(game, depth, player, boardEvaluator,
                                      -numeric_limits<float>::infinity(),
                                      numeric_limits<float>::infinity());
@@ -15,11 +15,11 @@ search_result AlphaBetaPlayer::chooseMove(Halma &game) {
     return result;
 };
 
-search_result
-AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
-                           const IBoardEvaluator &boardEvaluator,
-                           float alpha = -numeric_limits<float>::infinity(),
-                           float beta = numeric_limits<float>::infinity()) {
+search_result AlphaBetaPlayer::alphabeta(
+    Halma &game, int depth, FieldType maximizingPlayer,
+    const IBoardEvaluator &boardEvaluator,
+    float alpha = -numeric_limits<float>::infinity(),
+    float beta = numeric_limits<float>::infinity()) const {
     int visitedNodes = 0;
 
     Board &board = game.getBoard();

@@ -11,7 +11,7 @@ public:
 private:
     search_result alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
                             const IBoardEvaluator &boardEvaluator, float alpha,
-                            float beta);
+                            float beta) const;
 
 private:
     int depth;
