@@ -17,7 +17,7 @@ MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
                      const IBoardEvaluator &boardEvaluator) const {
     int visitedNodes = 0;
     Board &board = game.getBoard();
-    if (depth == 0) {
+    if (depth == 0 || game.checkWinner(maximizingPlayer)) {
         return search_result{
             boardEvaluator.evaluateBoard(board, maximizingPlayer),
             piece_move(-1, -1, -1, -1), visitedNodes};

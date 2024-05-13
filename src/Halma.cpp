@@ -57,7 +57,7 @@ int Halma::playGame(bool print) {
     int visitedNodes = 0;
 
     while (!isGameOver) {
-        playTurn(print);
+        visitedNodes += playTurn(print);
     }
 
     return visitedNodes;
