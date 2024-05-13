@@ -1,35 +1,31 @@
 #include "./header/AlphaBetaPlayer.hpp"
+#include "./header/Halma.hpp"
 #include "./interface/IBoardEvaluator.hpp"
-#include <algorithm>
-#include <iostream>
 #include <limits>
 
 AlphaBetaPlayer::AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator,
-                                 int depth, FieldType maximizingPlayer)
-    : boardEvaluator(boardEvaluator), depth(depth),
-      maximizingPlayer(maximizingPlayer){};
+                                 int depth)
+    : boardEvaluator(boardEvaluator), depth(depth){};
 
-void AlphaBetaPlayer::makeMove(Halma &game) {
-    pair<float, piece_move> minmaxResult = alphabeta(
-        game, depth, maximizingPlayer, boardEvaluator,
-        -numeric_limits<float>::infinity(), numeric_limits<float>::infinity());
+search_result AlphaBetaPlayer::chooseMove(Halma &game) {
+    search_result result = alphabeta(game, depth, player, boardEvaluator,
+                                     -numeric_limits<float>::infinity(),
+                                     numeric_limits<float>::infinity());
 
-    piece_move chosenMove = minmaxResult.second;
-    cout << "Player " << this->maximizingPlayer
-         << " has chose move with evaluation: " << minmaxResult.first << "\n\n";
-    game.makeMove(chosenMove);
+    return result;
 };
 
-pair<float, piece_move>
+search_result
 AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
                            const IBoardEvaluator &boardEvaluator,
                            float alpha = -numeric_limits<float>::infinity(),
                            float beta = numeric_limits<float>::infinity()) {
+    int visitedNodes = 0;
 
     Board &board = game.getBoard();
     if (depth == 0 || game.checkWinner(maximizingPlayer)) {
         return {boardEvaluator.evaluateBoard(board, maximizingPlayer),
-                piece_move(-1, -1, -1, -1)};
+                piece_move(-1, -1, -1, -1), visitedNodes};
     }
 
     FieldType currentPlayer = game.getCurrentPlayer();
@@ -40,12 +36,16 @@ AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
 
     vector<piece_move> allMoves = board.getPlayerMoves(currentPlayer);
 
-    for (piece_move move : allMoves) {
+    for (const piece_move &move : allMoves) {
         game.makeMockMove(move);
-        float evaluation = alphabeta(game, depth - 1, maximizingPlayer,
-                                     boardEvaluator, alpha, beta)
-                               .first;
+
+        search_result childResult = alphabeta(game, depth - 1, maximizingPlayer,
+                                              boardEvaluator, alpha, beta);
         game.undoMockMove(move);
+        float evaluation = childResult.evaluation;
+
+        visitedNodes++;
+        visitedNodes += childResult.visitedNodes;
 
         if (maximize) {
             if (evaluation > bestEvaluation) {
@@ -68,5 +68,5 @@ AlphaBetaPlayer::alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
         }
     }
 
-    return {bestEvaluation, bestMove};
+    return search_result{bestEvaluation, bestMove, visitedNodes};
 };

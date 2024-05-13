@@ -5,18 +5,15 @@
 
 class AlphaBetaPlayer : public IHalmaPlayer {
 public:
-    AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator, int depth = 1,
-                    FieldType maximizingPlayer = FieldType::WHITE);
-    void makeMove(Halma &game);
+    AlphaBetaPlayer(const IBoardEvaluator &boardEvaluator, int depth = 2);
+    search_result chooseMove(Halma &game) const;
 
 private:
-    pair<float, piece_move> alphabeta(Halma &game, int depth,
-                                      FieldType maximizingPlayer,
-                                      const IBoardEvaluator &boardEvaluator,
-                                      float alpha, float beta);
+    search_result alphabeta(Halma &game, int depth, FieldType maximizingPlayer,
+                            const IBoardEvaluator &boardEvaluator, float alpha,
+                            float beta);
 
 private:
     int depth;
-    FieldType maximizingPlayer;
     const IBoardEvaluator &boardEvaluator;
 };

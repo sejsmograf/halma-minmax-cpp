@@ -3,26 +3,24 @@
 #include "interface/IBoardEvaluator.hpp"
 #include <limits>
 
-MinmaxPlayer::MinmaxPlayer(const IBoardEvaluator &boardEvaluator, int depth,
-                           FieldType maximizingPlayer)
-    : depth(depth), maximizingPlayer(maximizingPlayer),
-      boardEvaluator(boardEvaluator) {}
+MinmaxPlayer::MinmaxPlayer(const IBoardEvaluator &boardEvaluator, int depth)
+    : depth(depth), boardEvaluator(boardEvaluator) {}
 
-void MinmaxPlayer::makeMove(Halma &game) {
-    pair<float, piece_move> minmaxResult =
-        minmax(game, depth, maximizingPlayer, boardEvaluator);
+search_result MinmaxPlayer::chooseMove(Halma &game) {
+    search_result minmaxResult = minmax(game, depth, player, boardEvaluator);
 
-    piece_move chosenMove = minmaxResult.second;
-    game.makeMove(chosenMove);
+    return minmaxResult;
 }
 
-pair<float, piece_move>
-MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
-                     const IBoardEvaluator &boardEvaluator) {
+search_result MinmaxPlayer::minmax(Halma &game, int depth,
+                                   FieldType maximizingPlayer,
+                                   const IBoardEvaluator &boardEvaluator) {
+    int visitedNodes = 0;
     Board &board = game.getBoard();
     if (depth == 0) {
-        return {boardEvaluator.evaluateBoard(board, maximizingPlayer),
-                piece_move(-1, -1, -1, -1)};
+        return search_result{
+            boardEvaluator.evaluateBoard(board, maximizingPlayer),
+            piece_move(-1, -1, -1, -1), visitedNodes};
     }
 
     FieldType currentPlayer = game.getCurrentPlayer();
@@ -32,11 +30,15 @@ MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
     piece_move bestMove = {-1, -1, -1, -1};
     vector<piece_move> allMoves = board.getPlayerMoves(currentPlayer);
 
-    for (piece_move move : allMoves) {
+    for (const piece_move &move : allMoves) {
         game.makeMockMove(move);
-        float evaluation =
-            minmax(game, depth - 1, maximizingPlayer, boardEvaluator).first;
+        search_result childResult =
+            minmax(game, depth - 1, maximizingPlayer, boardEvaluator);
         game.undoMockMove(move);
+
+        float evaluation = childResult.evaluation;
+        visitedNodes++;
+        visitedNodes += childResult.visitedNodes;
 
         if (maximize) {
             if (evaluation > bestEvaluation) {
@@ -51,5 +53,5 @@ MinmaxPlayer::minmax(Halma &game, int depth, FieldType maximizingPlayer,
         }
     }
 
-    return {bestEvaluation, bestMove};
+    return search_result{bestEvaluation, bestMove, visitedNodes};
 };

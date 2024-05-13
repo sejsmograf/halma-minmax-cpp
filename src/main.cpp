@@ -6,10 +6,10 @@
 #include "./header/Halma.hpp"
 #include "./header/Heuristics.hpp"
 #include "./header/MinmaxPlayer.hpp"
-#include "./interface/IBoardEvaluator.hpp"
 #include "./interface/IPawnHeuristic.hpp"
 #include "header/AlphaBetaPlayer.hpp"
 #include "header/BoardEvaluators.hpp"
+#include "interface/IBoardEvaluator.hpp"
 
 static vector<string> readStdin() {
     vector<string> inputLines;
@@ -24,24 +24,13 @@ static vector<string> readStdin() {
 }
 
 int main() {
-    Halma h(readStdin());
     const IPawnHeuristic &distance = ManhattanDistance();
-    MovePotentialEvaluator moveEvaluator(distance);
-    CampAndCenterDistanceEvaluator centerEvaluator(distance);
-    AlphaBetaPlayer player1(moveEvaluator, 2, h.PLAYER_ONE);
-    AlphaBetaPlayer player2(moveEvaluator, 2, h.PLAYER_TWO);
+    const IBoardEvaluator &evaluator = CampDistanceEvaluator(distance);
+    AlphaBetaPlayer player1(evaluator, 3);
+    AlphaBetaPlayer player2(evaluator, 3);
 
-    for (int i = 0; i < 1000; i++) {
-        player1.makeMove(h);
-        h.printBoard();
-        if (h.isGameOver) {
-            break;
-        }
+    Halma h(&player1, &player2);
+    int visited = h.playGame();
 
-        player2.makeMove(h);
-        h.printBoard();
-        if (h.isGameOver) {
-            break;
-        }
-    }
+    std::cout << "\nVisited a total of: " << visited << " nodes\n";
 }
