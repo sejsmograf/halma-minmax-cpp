@@ -66,9 +66,9 @@ int Halma::playGame(bool print) {
 int Halma::playTurn(bool print) {
     search_result foundMove;
     if (currentPlayer == PLAYER_ONE) {
-        search_result foundMove = playerOne->chooseMove(*this);
+        foundMove = playerOne->chooseMove(*this);
     } else if (currentPlayer == PLAYER_TWO) {
-        search_result foundMove = playerTwo->chooseMove(*this);
+        foundMove = playerTwo->chooseMove(*this);
     }
 
     makeMove(foundMove.move);
