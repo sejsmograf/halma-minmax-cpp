@@ -1,6 +1,7 @@
 # Halma AI
 
 ## Description
+For detailed description in Polish see [this document](./lab_report/tomasz_mroczko_sprawozdanie_02.pdf)
 Halma AI is a C++ implementation of an AI for the board game Halma, utilizing the Min-Max algorithm to choose optimal moves. The AI analyzes possible moves and selects the best strategy to win the game.
 
 ## Min-Max Algorithm
