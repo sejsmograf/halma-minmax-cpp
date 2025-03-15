@@ -21,6 +21,6 @@ Building requires [CMake](https://cmake.org)
 
 3. Build the project:
    ```bash
-   cmake --build 
+   cmake --build .
    ```
 Executable main will be created in the build folder
